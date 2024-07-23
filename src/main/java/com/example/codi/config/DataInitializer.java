@@ -5,9 +5,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-import com.example.codi.entity.*;
-import com.example.codi.repository.*;
+import com.example.codi.entity.Brand;
+import com.example.codi.entity.Category;
+import com.example.codi.entity.Item;
+import com.example.codi.repository.BrandRepository;
+import com.example.codi.repository.CategoryRepository;
+import com.example.codi.repository.ItemRepository;
 
+// 초기 데이터 등록
 @Configuration
 public class DataInitializer {
 

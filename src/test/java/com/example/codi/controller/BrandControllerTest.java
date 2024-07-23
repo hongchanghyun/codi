@@ -1,18 +1,20 @@
 package com.example.codi.controller;
 
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.codi.dto.BrandDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -21,7 +23,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
+@ActiveProfiles("embedded-test")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @Sql("/test-data.sql")
 @Transactional
@@ -51,28 +54,59 @@ public class BrandControllerTest {
         brandDto.setName("New Brand");
 
         mockMvc.perform(post("/api/brands")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(brandDto)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(brandDto)))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.id").exists());
     }
 
     @Test
-    @Order(3)
     public void testUpdateBrand() throws Exception {
         BrandDto brandDto = new BrandDto();
-        brandDto.setName("Updated Brand");
+        brandDto.setName("New Brand");
 
-        mockMvc.perform(put("/api/brands/10")
+        // POST 요청으로 브랜드 추가
+        MvcResult result = mockMvc.perform(post("/api/brands")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(brandDto)))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.id").exists())
+            .andReturn();
+
+        // 응답 본문에서 ID 추출
+        String responseString = result.getResponse().getContentAsString();
+        Long id = JsonPath.parse(responseString).read("$.id", Long.class);
+
+        // 추출한 ID를 사용하여 브랜드 업데이트 테스트
+        BrandDto updatedBrandDto = new BrandDto();
+        updatedBrandDto.setName("Updated Brand");
+
+        mockMvc.perform(put("/api/brands/" + id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updatedBrandDto)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true));
     }
 
     @Test
     public void testDeleteBrand() throws Exception {
-        mockMvc.perform(delete("/api/brands/1"))
+        BrandDto brandDto = new BrandDto();
+        brandDto.setName("New Brand");
+
+        // POST 요청으로 브랜드 추가
+        MvcResult result = mockMvc.perform(post("/api/brands")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(brandDto)))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.id").exists())
+            .andReturn();
+
+        // 응답 본문에서 ID 추출
+        String responseString = result.getResponse().getContentAsString();
+        Long id = JsonPath.parse(responseString).read("$.id", Long.class);
+
+        // 추출한 ID를 사용하여 브랜드 삭제 테스트
+        mockMvc.perform(delete("/api/brands/" + id))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success").value(true));
     }

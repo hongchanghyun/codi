@@ -19,7 +19,10 @@
 2. NoSql에 가격변동시 집계하여 비동기로 업데이트
 
 #### 실행방법
-gradle bootRun
+실행
+- ./gradlew bootRun
+테스트
+- ./gradlew test
 
 #### etc
 [포스트맨] ([링크](https://github.com/hongchanghyun/codi/blob/main/src/main/resources/%EC%BD%94%EB%94%94.postman_collection.json))

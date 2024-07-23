@@ -25,4 +25,4 @@
 - ./gradlew test
 
 #### etc
-[포스트맨] ([링크](https://github.com/hongchanghyun/codi/blob/main/src/main/resources/%EC%BD%94%EB%94%94.postman_collection.json))
+postman import ([링크](https://github.com/hongchanghyun/codi/blob/main/src/main/resources/%EC%BD%94%EB%94%94.postman_collection.json))
